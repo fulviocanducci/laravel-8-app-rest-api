@@ -4,7 +4,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Carbon\Carbon;
 use DateInterval;
 use DateTime;
 
@@ -13,7 +12,6 @@ class LoginController extends Controller
     public function authenticate(Request $request)
     {
         $credentials = $request->only('email', 'password');
-
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 400);
@@ -21,16 +19,11 @@ class LoginController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
-        $data['token'] = $token;
-        $data['ttl'] = config('jwt.ttl');
-        $data['ttl_type'] = 'minutes';
-        $data['createdAt'] = (new DateTime())->format(DateTime::ATOM);
-        $data['expiredAt'] = (new DateTime())->add(new DateInterval('PT' . $data['ttl'] . 'M'))->format(DateTime::ATOM);
+        $data = $this->getTokenData($token);
         return response()->json(compact('data'));
     }
 
-
-    public function getAuthenticatedUser()
+    public function user()
     {
         try {
             if (! $user = JWTAuth::parseToken()->authenticate()) {
@@ -48,4 +41,15 @@ class LoginController extends Controller
         }
         return response()->json(compact('user'));
     }
+
+    private function getTokenData($token) 
+    {
+        $data['token'] = $token;
+        $data['ttl'] = config('jwt.ttl');
+        $data['ttl_type'] = 'minutes';
+        $data['createdAt'] = (new DateTime())->format(DateTime::ATOM);
+        $data['expiredAt'] = (new DateTime())->add(new DateInterval('PT' . $data['ttl'] . 'M'))->format(DateTime::ATOM);
+        return $data;
+    }
+    
 }
