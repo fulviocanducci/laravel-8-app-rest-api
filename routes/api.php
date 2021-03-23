@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\LoginController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('login/authenticate', [LoginController::class, "authenticate"]);
+Route::post('login/authenticate', [LoginController::class, "authenticate"])->name('authenticate');
 
 Route::group(['middleware' => 'jwt.auth'], function() {
-    Route::post('login/user', [LoginController::class, "user"]);
+    Route::post('login/user', [LoginController::class, "user"])->name('login.user');
 });
